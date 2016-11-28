@@ -1,0 +1,472 @@
+<div class="pull-left breadcrumb_admin clear_both">
+    <div class="pull-left page_title theme_color">
+        <h1>Item</h1>
+        <h2 class="">Showing Items</h2>
+    </div>
+</div>
+<div class="container clear_both padding_fix">
+    <div *ngIf="!ServerOffline" class="row">
+        <div class="col-md-12">
+
+            <portlet title="Add Edit Item" header_color="" border_color="green_border horizontal_border h1">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="panel-group accordion accordion-semi" id="accorAdd">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title"> <a class="collapsed" data-toggle="collapse" data-parent="#accorAdd" href="#acAdd"> <i class="fa fa-plus fa-2x"></i>Add Item </a> </h4>
+                                </div>
+                                <div style="height: auto;" id="acAdd" class="panel-collapse collapse" >
+                                    <form class="form-horizontal" #AddForm = "ngForm" (ngSubmit)="Save(true)">
+                                        <div class="form-group" [ngClass]="{'has-success': ItemName.valid, 'has-error':!ItemName.valid && ItemName.touched || !nameUnique}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Name</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="text"  class="form-control big" autocomplete="off" placeholder="Name" required #ItemName="ngModel" [(ngModel)]="item.Name" name = "Item">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Size.valid, 'has-error':!Size.valid && Size.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Size</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                               <select style="height: 40px !important" class="form-control big" required #Size="ngModel" (change)="changePieces($event.target.value)" [(ngModel)]="item.Size" name = "Size">
+                                                   <option value=""></option>
+                                                   <option *ngFor="let size of sizes" [value]="size.Name" >{{size.Name}}</option>
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Pieces.valid, 'has-error':!Pieces.valid && Pieces.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Pieces</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="number"  class="form-control big" autocomplete="off" placeholder="Pieces" required #Pieces="ngModel" [(ngModel)]="item.Pieces" name = "Pieces">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Company.valid, 'has-error':!Company.valid && Company.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Company</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                               <select style="height: 40px !important" class="form-control big" (change)="changeSub($event.target.value)" required #Company="ngModel" [(ngModel)]="item.Company" name = "Company">
+                                                   <option value=""></option>
+                                                   <option *ngFor="let cmp of companies" [value]="cmp.Name"> {{cmp.Name}}</option>
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Sub.valid, 'has-error':!Sub.valid && Sub.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Sub</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                               <select [disabled]="subs.length<=0" style="height: 40px !important" class="form-control big" #Sub="ngModel" [(ngModel)]="item.Sub" name = "Sub">
+                                                   <option value=""></option>
+                                                   <option *ngFor="let sub of subs" [value]="sub.Name">{{sub.Name}} </option>
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Type.valid, 'has-error':!Type.valid && Type.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Type</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                               <select style="height: 40px !important" class="form-control big" required #Type="ngModel" [(ngModel)]="item.Type" name = "Type">
+                                                   <option value=""></option>
+                                                    <option *ngFor="let type of types" value="{{type.Name}}">{{type.Name}}</option>
+                                               </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': DPL.valid, 'has-error':!DPL.valid && DPL.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>DPL</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="text" class="form-control big" (keyup)="toCode(true)" autocomplete="off" placeholder="DPL" #DPL="ngModel" [(ngModel)]="item.DPL" name = "DPL">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': AP.valid, 'has-error':!AP.valid && AP.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>AP</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="text" class="form-control big" (keyup)="toCode(false)" autocomplete="off" placeholder="AP" #AP="ngModel" [(ngModel)]="item.AP" name = "AP">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Rate.valid, 'has-error':!Rate.valid && Rate.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Rate</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Rate" #Rate="ngModel" [(ngModel)]="item.Rate" name = "Rate">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Max.valid, 'has-error':!Max.valid && Max.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Max</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Max" #Max="ngModel" [(ngModel)]="item.Max" name = "Max">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Avg.valid, 'has-error':!Avg.valid && Avg.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Avg</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Avg" #Avg="ngModel" [(ngModel)]="item.Avg" name = "AVG">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Min.valid, 'has-error':!Min.valid && Min.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Min</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Min" #Min="ngModel" [(ngModel)]="item.Min" name = "MIN">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Qty.valid, 'has-error':!Qty.valid && Qty.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Qty</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Qty" #Qty="ngModel" [(ngModel)]="item.TQty" name = "TQty">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6">
+                                                <button [disabled]="!AddForm.valid || item._id" class="btn btn-success big btn-block col-sm-6" value="Save" type="submit">Save</button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a type="submit" class="btn btn-warning big btn-block col-sm-6" (click)="Clear()">Clear</a>
+                                            </div>
+                                        </div>
+                                        <spinner [visible]="saving"></spinner>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel-group accordion accordion-semi" id="accorEdit">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title"> <a [ngClass]="{collapsed: !EditingOpen}" data-toggle="collapse" data-parent="#accorEdit" href="#acEdit"> <i class="fa fa-edit fa-2x"></i>Edit Item </a> </h4>
+                                </div>
+                                <div style="height: auto;" id="acEdit" class="panel-collapse collapse" [ngClass]="{in: EditingOpen}">
+                                    <form class="form-horizontal" #EditForm = "ngForm" (ngSubmit)="Save(false)">
+                                        <div class="form-group" [ngClass]="{'has-success': ItemName.valid, 'has-error':!ItemName.valid && ItemName.touched || !nameUnique}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Name</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="text"  class="form-control big" autocomplete="off" placeholder="Name" required #ItemName="ngModel" [(ngModel)]="item.Name" name = "Item">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Size.valid, 'has-error':!Size.valid && Size.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Size</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <select style="height: 40px !important" class="form-control big" required #Size="ngModel" (change)="changePieces($event.target.value)" [(ngModel)]="item.Size" name = "Size">
+                                                    <option value=""></option>
+                                                    <option *ngFor="let size of sizes" [value]="size.Name" >{{size.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Pieces.valid, 'has-error':!Pieces.valid && Pieces.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Pieces</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="number"  class="form-control big" autocomplete="off" placeholder="Pieces" required #Pieces="ngModel" [(ngModel)]="item.Pieces" name = "Pieces">
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Company.valid, 'has-error':!Company.valid && Company.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Company</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <select style="height: 40px !important" class="form-control big" (change)="changeSub($event.target.value)" required #Company="ngModel" [(ngModel)]="item.Company" name = "Company">
+                                                    <option value=""></option>
+                                                    <option *ngFor="let cmp of companies" [value]="cmp.Name"> {{cmp.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Sub.valid, 'has-error':!Sub.valid && Sub.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Sub</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <select [disabled]="subs.length<=0" style="height: 40px !important" class="form-control big" #Sub="ngModel" [(ngModel)]="item.Sub" name = "Sub">
+                                                    <option value=""></option>
+                                                    <option *ngFor="let sub of subs" [value]="sub.Name">{{sub.Name}} </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" [ngClass]="{'has-success': Type.valid, 'has-error':!Type.valid && Type.touched}">
+                                            <div class="col-md-3">
+                                                <h3><label style="padding-top: 5px">Type</label></h3>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <select style="height: 40px !important" class="form-control big" required #Type="ngModel" [(ngModel)]="item.Type" name = "Type">
+                                                    <option value=""></option>
+                                                    <option *ngFor="let type of types" value="{{type.Name}}">{{type.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': DPL.valid, 'has-error':!DPL.valid && DPL.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>DPL</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="text" class="form-control big" (keyup)="toCode(true)" autocomplete="off" placeholder="DPL" #DPL="ngModel" [(ngModel)]="item.DPL" name = "DPL">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': AP.valid, 'has-error':!AP.valid && AP.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>AP</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="text" class="form-control big" (keyup)="toCode(false)" autocomplete="off" placeholder="AP" #AP="ngModel" [(ngModel)]="item.AP" name = "AP">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Rate.valid, 'has-error':!Rate.valid && Rate.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Rate</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Rate" #Rate="ngModel" [(ngModel)]="item.Rate" name = "Rate">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Max.valid, 'has-error':!Max.valid && Max.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Max</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Max" #Max="ngModel" [(ngModel)]="item.Max" name = "Max">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Avg.valid, 'has-error':!Avg.valid && Avg.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Avg</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Avg" #Avg="ngModel" [(ngModel)]="item.Avg" name = "AVG">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Min.valid, 'has-error':!Min.valid && Min.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Min</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Min" #Min="ngModel" [(ngModel)]="item.Min" name = "MIN">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group" [ngClass]="{'has-success': Qty.valid, 'has-error':!Qty.valid && Qty.touched}">
+                                                    <div class="col-md-3">
+                                                        <h3><label>Qty</label></h3>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="number" class="form-control big" required  autocomplete="off" placeholder="Qty" #Qty="ngModel" [(ngModel)]="item.TQty" name = "TQty">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-6">
+                                                <button [disabled]="!EditForm.valid || !item._id" class="btn btn-success big btn-block col-sm-6" value="Save" type="submit">Save</button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a type="submit" class="btn btn-warning big btn-block col-sm-6" (click)="Clear()">Clear</a>
+                                            </div>
+                                        </div>
+                                        <spinner [visible]="saving"></spinner>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" *ngIf="custmessage.length >= 0">
+                        <div *ngFor="let msg of custmessage" class="alert alert-{{msg.type}} fade in">
+                            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                            <h3>{{msg.title}} : {{msg.message}}</h3>
+                        </div>
+                    </div>
+                </div>
+            </portlet>
+        </div>
+        <div class="col-md-12">
+            <div class="panel-group accordion accordion-semi" >
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <a class="collapsed" data-toggle="collapse" href="#accordSearch"> <i class="fa fa-search fa-2x"></i> </a>
+                            </div>
+                            <div class="col-md-1">
+                                <a (click)="Refresh(false)"><i class="fa fa-bookmark fa-2x"></i></a>
+                            </div>
+                            <div class="col-md-3" style="padding-top: 11px;">
+                                <input type="text" class="form-control big" placeholder="Item Name!!" (keyup)="SearchByName($event.target.value,false)">
+                            </div>
+                            <div class="col-md-6"></div>
+                            <div class="col-md-1">
+                                <a (click)="Refresh(true)"><i class="fa fa-refresh fa-2x"></i></a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div style="height: auto;" id="accordSearch" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <h2 style="text-align: center; color: mediumvioletred" >Composite Search</h2>
+                                <table class="table" style="border:none">
+                                    <thead></thead>
+                                    <tbody>
+                                    <tr>
+                                        <td width="30%">
+                                            <input type="text" class="form-control big" placeholder="Item Name!!" [(ngModel)]="search.Name">
+                                        </td>
+                                        <td width="30%">
+                                            <select style="height: 40px !important" class="form-control big" (change)="changeSub($event.target.value)" required #Company="ngModel" [(ngModel)]="search.Company" name = "Company">
+                                                <option value="">Choose Company..</option>
+                                                <option *ngFor="let cmp of companies" [value]="cmp.Name"> {{cmp.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td width="30%">
+                                            <select [disabled]="subs.length<=0" style="height: 40px !important" class="form-control big" #Sub="ngModel" [(ngModel)]="search.Sub" name = "Sub">
+                                                <option value="">Choose SubCompany.. </option>
+                                                <option *ngFor="let sub of subs" [value]="sub.Name">{{sub.Name}} </option>
+                                            </select>
+                                        </td>
+                                        <td width="10%" rowspan="3"><a class="btn btn-info btn-block" (click)="CompositSearch()">Search</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select style="height: 40px !important" class="form-control big" required #Type="ngModel" [(ngModel)]="search.Type" name="Type">
+                                                <option value="">Choose Type..</option>
+                                                <option *ngFor="let type of types" value="{{type.Name}}">{{type.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select style="height: 40px !important" class="form-control big" required #Size="ngModel" [(ngModel)]="search.Size" name = "Size">
+                                                <option value="">Choose Size..</option>
+                                                <option *ngFor="let size of sizes" [value]="size.Name" >{{size.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control big" required  autocomplete="off" placeholder="> = QTY " #Rate="ngModel" [(ngModel)]="search.GTEQ" name = "Quantity">
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12" *ngIf="Fetching">
+            <div style="text-align: center;">
+                <h1>Fetching Items From Server Please Wait!</h1><br>
+                <div style="text-align: center;color: #262A33">
+                    <i class="fa fa-5x fa-spinner fa-spin"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12" *ngIf="!Fetching">
+           <div class="row">
+               <div *ngFor="let item of pagedItems, let i=index" class="col-md-3">
+                   <div class="thumbnail" style="overflow: hidden">
+                       <div></div>
+                       <div style="text-align: center;"><h2><a style="color:#0aa699;" (click)="SearchByCompany(item.Company)">{{item.Company}}</a></h2><span class="pull-right"><a style="text-decoration: none; color: #f35958; cursor: pointer" class="fa fa-times fa-2x" (click)="Delete(item._id)"></a></span></div>
+                           <div style="font-size: 50px; margin: 2px auto 20px;width: 200px; height: 200px; border-radius: 100%; text-align: center; padding-top: 60px; background-color: #334559">
+                                <a style="color: #f35958;" (click)="Edit(item)">{{item.TQty}}</a>
+                               <div *ngIf="item.Loc.length>0" style="padding-top: 13%;">
+                                   <a class="collapsed itmName" style="padding-left: 2%; font-size: 25px;" data-toggle="collapse" href="#ac{{i}}"><i class="fa fa-chevron-down"></i></a>
+                               </div>
+                           </div>
+                       <div *ngIf="item.Loc.length>0" style="height: auto;" id="ac{{i}}" class="panel-collapse collapse">
+                           <ul  class="list-group">
+                               <li *ngFor="let loc of item.Loc" class="list-group-item" style="text-align: center">
+                                   <h4 style="margin-bottom:5px"><span class="pull-left">{{getLocationName(loc.LocId)}}</span>  --has-->  <input class="pull-right" style="color: #f35958; width: 60px; background-color: #334559; border: none; padding:0" type="number" autocomplete="off" [(ngModel)]="loc.Qty" (keyup)="changeTQty(i)"></h4>
+                               </li>
+                               <li style="text-align: center"><button class="btn btn-success" (click)="saveLocQtyChanged(item)">Save</button></li>
+                           </ul>
+                       </div>
+                           <div class="caption" style="text-align: center;">
+                               <div class="progress">
+                                   <div [ngStyle]="{width: calcPerc(item,0)+'%'}" class="progress-bar progress-bar-danger">
+                                       <span class="sr-only">35% Complete (success)</span>
+                                   </div>
+                                   <div [ngStyle]="{width: calcPerc(item,1)+'%'}" class="progress-bar progress-bar-success">
+                                       <span class="sr-only">20% Complete (warning)</span>
+                                   </div>
+                                   <div [ngStyle]="{width: calcPerc(item,2)+'%'}" class="progress-bar progress-bar-warning">
+                                       <span class="sr-only">10% Complete (danger)</span>
+                                   </div>
+                               </div>
+                               <h3><a (click)="SearchBySub(item.Sub)" style="color: #f35958;">{{item.Sub}}</a> <a (click)="SearchByName(item.Name,true)" style="color: #5cb85c">{{item.Name}}</a> <a (click)="SearchBySize(item.Size)" style="color: #f0ad4e">{{item.Size}}</a> </h3>
+                           <h3 ><a (click)="SearchByType(item.Type)" style="color: #9e71ce">{{item.Type}}</a></h3>
+                            <h3 style="text-align: left">DPL :- {{item.DPL}}</h3>
+                            <h3 style="text-align: left">AP :- {{item.AP}}</h3>
+                            <h3 style="text-align: left">Rate :- {{item.Rate}}</h3>
+                       </div>
+                   </div>
+               </div>
+               <div class="col-md-12" *ngIf="items.length>=0">
+                   <pagation [items]="searchdItems" [page-size]="pageSize" (page-changed)="onPageChanged($event)"></pagation>
+               </div>
+               <div class="col-md-12">
+                   <div class="alert alert-danger" [hidden]="items.length>0"><h3>Sorry No Items Present! Try Adding Some</h3></div>
+               </div>
+               <div class="col-md-12">
+                   <div class="alert alert-danger" [hidden]="searchdItems.length>0"><h3>Sorry No Items Present According To Your Search! Change Search Parameters!</h3></div>
+               </div>
+
+           </div>
+        </div>
+    </div>
+    <div class="row" *ngIf="ServerOffline">
+        <div class="col-md-12">
+            <div style="text-align: center;">
+                <h1>Server Has Gone offline! Please Restart Server Manually!</h1><br>
+                <div style="text-align: center;color: #262A33">
+                    <i class="fa fa-5x fa-warning fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
